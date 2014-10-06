@@ -1058,6 +1058,28 @@ class StaticPlaceholderNode(Tag):
         ]
     )
 
+    def _get_placeholder_by_code(self, code, extra_bits):
+        """Returns a StaticPlaceholder instance by code
+
+        :param code: Code of the static placeholder
+        :returns: StaticPlaceholder instance
+        """
+        if isinstance(code, StaticPlaceholder):
+            return code
+        filters = {'code': code}
+        defaults = {'name': code, 'creation_method': StaticPlaceholder.CREATION_BY_TEMPLATE}
+        if 'site' in extra_bits:
+            site = Site.objects.get_current()
+            filters['site_id'] = site.pk
+        else:
+            filters['site_id__isnull'] = True
+        try:
+            static_placeholder = StaticPlaceholder.objects.get(**filters)
+        except StaticPlaceholder.DoesNotExist:
+            filters['defaults'] = defaults
+            static_placeholder, __ = StaticPlaceholder.objects.get_or_create(**filters)
+        return static_placeholder
+
     def render_tag(self, context, code, extra_bits, nodelist=None):
         # TODO: language override (the reason this is not implemented, is that language selection is buried way
         #       down somewhere in some method called in render_plugins. There it gets extracted from the request
@@ -1072,16 +1094,7 @@ class StaticPlaceholderNode(Tag):
             if nodelist:
                 return nodelist.render(context)
             return ''
-        if isinstance(code, StaticPlaceholder):
-            static_placeholder = code
-        else:
-            if 'site' in extra_bits:
-                site = Site.objects.get_current()
-                static_placeholder, __ = StaticPlaceholder.objects.get_or_create(code=code, site_id=site.pk, defaults={'name': code,
-                    'creation_method': StaticPlaceholder.CREATION_BY_TEMPLATE})
-            else:
-                static_placeholder, __ = StaticPlaceholder.objects.get_or_create(code=code, site_id__isnull=True, defaults={'name': code,
-                    'creation_method': StaticPlaceholder.CREATION_BY_TEMPLATE})
+        static_placeholder = self._get_placeholder_by_code(code, extra_bits)
         if not hasattr(request, 'static_placeholders'):
             request.static_placeholders = []
         request.static_placeholders.append(static_placeholder)
