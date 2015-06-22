@@ -3,7 +3,7 @@ import warnings
 
 from django.core.exceptions import ImproperlyConfigured
 from django.conf.urls import url, patterns, include
-from django.contrib.formtools.wizard.views import normalize_name
+from formtools.wizard.views import normalize_name
 from django.db import connection
 from django.db.models import signals
 from django.db.models.fields.related import ManyToManyField

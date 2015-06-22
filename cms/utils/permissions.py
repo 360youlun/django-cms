@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
 from django.db.models import Q
@@ -103,7 +104,7 @@ def has_page_change_permission(request):
     global_change_perm = GlobalPagePermission.objects.user_has_change_permission(
         request.user, site).exists()
     return request.user.is_superuser or (
-        request.user.has_perm(opts.app_label + '.' + opts.get_change_permission())
+        request.user.has_perm(opts.app_label + '.' + get_permission_codename('change', opts))
         and global_change_perm or has_any_page_change_permissions(request))
 
 
@@ -262,7 +263,7 @@ def has_global_change_permissions_permission(request):
     opts = GlobalPagePermission._meta
     user = request.user
     if user.is_superuser or (
-        user.has_perm(opts.app_label + '.' + opts.get_change_permission()) and
+        user.has_perm(opts.app_label + '.' + get_permission_codename('change', opts)) and
         has_global_page_permission(request, can_change=True)):
         return True
     return False

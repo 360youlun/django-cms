@@ -4,6 +4,7 @@ from django.db import models
 from django.template.defaultfilters import title
 from django.utils.encoding import force_text
 from django.utils.timezone import get_current_timezone_name
+from django.contrib.auth import get_permission_codename
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.contrib import admin
@@ -117,8 +118,7 @@ class Placeholder(models.Model):
         if not getattr(request, 'user', None):
             return False
         opts = obj._meta
-        perm_accessor = getattr(opts, 'get_%s_permission' % key)
-        perm_code = '%s.%s' % (opts.app_label, perm_accessor())
+        perm_code = '%s.%s' % (opts.app_label, get_permission_codename(key, opts))
         return request.user.has_perm(perm_code) or request.user.has_perm(perm_code, obj)
 
     def has_change_permission(self, request):

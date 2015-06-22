@@ -5,7 +5,7 @@ from cms.publisher.query import PublisherQuerySet
 class PublisherManager(models.Manager):
     """Manager with some support handling publisher.
     """
-    def get_query_set(self):
+    def get_queryset(self):
         """Change standard model queryset to our own.
         """
         return PublisherQuerySet(self.model)

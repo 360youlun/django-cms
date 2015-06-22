@@ -48,7 +48,7 @@ from cms.utils.compat.dj import force_unicode, get_user_model
 from cms.utils.compat.tests import UnittestCompatMixin
 from cms.utils.conf import get_cms_setting
 from cms.utils.placeholder import PlaceholderNoAction, MLNGPlaceholderActions, get_placeholder_conf
-from cms.utils.plugins import get_placeholders, assign_plugins
+from cms.utils.plugins import get_placeholders, assign_plugins, _get_nodelist
 from cms.utils.urlutils import admin_reverse
 
 
@@ -247,7 +247,7 @@ class PlaceholderTestCase(CMSTestCase, UnittestCompatMixin):
                 'plugins': ['TextPlugin', 'LinkPlugin'],
                 'default_plugins':[
                     {
-                        'plugin_type':'TextPlugin', 
+                        'plugin_type':'TextPlugin',
                         'values':{
                             'body':'<p>Some default text</p>'
                         },
@@ -517,12 +517,12 @@ class PlaceholderTestCase(CMSTestCase, UnittestCompatMixin):
             'col_left': {
                 'default_plugins' : [
                     {
-                        'plugin_type':'TextPlugin', 
-                        'values':{'body':'<p>en default body 1</p>'}, 
+                        'plugin_type':'TextPlugin',
+                        'values':{'body':'<p>en default body 1</p>'},
                     },
                     {
-                        'plugin_type':'TextPlugin', 
-                        'values':{'body':'<p>en default body 2</p>'}, 
+                        'plugin_type':'TextPlugin',
+                        'values':{'body':'<p>en default body 2</p>'},
                     },
                 ]
             },
@@ -541,7 +541,7 @@ class PlaceholderTestCase(CMSTestCase, UnittestCompatMixin):
         """
         Validate a default textplugin with a nested default link plugin
         """
-        
+
         class NoPushPopContext(Context):
             def push(self):
                 pass
@@ -693,16 +693,18 @@ class PlaceholderTestCase(CMSTestCase, UnittestCompatMixin):
         which is retained by the cached template loader, and future
         renders of that template will render the super block twice.
         """
-    
+
+        nodelist = _get_nodelist(get_template("placeholder_tests/test_super_extends_2.html"))
         self.assertNotIn('one',
-            get_template("placeholder_tests/test_super_extends_2.html").nodelist[0].blocks.keys(),
+            nodelist[0].blocks.keys(),
             "test_super_extends_1.html contains a block called 'one', "
             "but _2.html does not.")
 
         get_placeholders("placeholder_tests/test_super_extends_2.html")
 
+        nodelist = _get_nodelist(get_template("placeholder_tests/test_super_extends_2.html"))
         self.assertNotIn('one',
-            get_template("placeholder_tests/test_super_extends_2.html").nodelist[0].blocks.keys(),
+            nodelist[0].blocks.keys(),
             "test_super_extends_1.html still should not contain a block "
             "called 'one' after rescanning placeholders.")
 
@@ -723,7 +725,7 @@ class PlaceholderTestCase(CMSTestCase, UnittestCompatMixin):
         output = template.render(Context({}))
         self.assertEqual(['Whee'], [o for o in output.split('\n')
             if 'Whee' in o])
-          
+
         get_placeholders("placeholder_tests/test_super_extends_2.html")
 
         template = get_template("placeholder_tests/test_super_extends_2.html")
