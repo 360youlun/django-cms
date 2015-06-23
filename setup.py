@@ -32,11 +32,11 @@ setup(
     platforms=['OS Independent'],
     classifiers=CLASSIFIERS,
     install_requires=[
-        'Django>=1.7,<=1.8',
-        'django-classy-tags>=0.5',
+        'Django>=1.7,<1.9',
+        'django-classy-tags>=0.6',
         'html5lib',
-        'django-mptt>=0.6,<0.6.2',
-        'django-sekizai>=0.7',
+        'django-mptt>=0.7',
+        'django-sekizai>=0.8',
         'djangocms-admin-style'
     ],
     tests_require=[
