@@ -22,7 +22,6 @@ from cms.models.placeholdermodel import Placeholder
 from cms.models.pluginmodel import CMSPlugin
 from cms.publisher.errors import MpttPublisherCantPublish
 from cms.utils import i18n, page as page_utils
-from cms.utils.compat import DJANGO_1_5
 from cms.utils.compat.dj import force_unicode, python_2_unicode_compatible
 from cms.utils.compat.metaclasses import with_metaclass
 from cms.utils.conf import get_cms_setting
@@ -455,10 +454,7 @@ class Page(with_metaclass(PageMetaClass, MPTTModel)):
 
         if commit:
             if no_signals:  # ugly hack because of mptt
-                if DJANGO_1_5:
-                    self.save_base(cls=self.__class__, **kwargs)
-                else:
-                    self.save_base(**kwargs)
+                self.save_base(**kwargs)
             else:
                 super(Page, self).save(**kwargs)
 
@@ -476,7 +472,7 @@ class Page(with_metaclass(PageMetaClass, MPTTModel)):
         if keep_state:
             delattr(self, '_publisher_keep_state')
 
-        if not DJANGO_1_5 and 'cls' in kwargs:
+        if 'cls' in kwargs:
             del kwargs['cls']
         ret = super(Page, self).save_base(*args, **kwargs)
         return ret

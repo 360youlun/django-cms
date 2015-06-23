@@ -25,7 +25,6 @@ import cms
 from cms.test_utils.cli import configure
 from cms.test_utils.util import static_analysis
 from cms.test_utils.tmpdir import temp_dir
-from cms.utils.compat import DJANGO_1_6
 import menus
 
 __doc__ = '''django CMS development helper script.
@@ -69,20 +68,7 @@ Options:
 def server(bind='127.0.0.1', port=8000, migrate_cmd=False):
     if os.environ.get("RUN_MAIN") != "true":
         from cms.utils.compat.dj import get_user_model
-        if DJANGO_1_6:
-            from south.management.commands import syncdb, migrate
-            if migrate_cmd:
-                syncdb.Command().handle_noargs(interactive=False, verbosity=1,
-                                               database='default')
-                migrate.Command().handle(interactive=False, verbosity=1)
-            else:
-                syncdb.Command().handle_noargs(interactive=False, verbosity=1,
-                                               database='default',
-                                               migrate=False, migrate_all=True)
-                migrate.Command().handle(interactive=False, verbosity=1,
-                                         fake=True)
-        else:
-            call_command("migrate", database='default')
+        call_command("migrate", database='default')
         User = get_user_model()
         if not User.objects.filter(is_superuser=True).exists():
             usr = User()
@@ -227,41 +213,11 @@ def makemigrations(migrate_plugins=True, merge=False, squash=False):
             'djangocms_text_ckeditor', 'djangocms_picture', 'djangocms_teaser',
             'djangocms_file', 'djangocms_flash', 'djangocms_video',
         ])
-    if DJANGO_1_6:
-        from south.exceptions import NoMigrations
-        from south.migration import Migrations
-
-        if merge:
-            raise DjangoRuntimeWarning(
-                u'Option not implemented for Django 1.6')
-        for application in applications:
-            try:
-                Migrations(application)
-            except NoMigrations:
-                print('ATTENTION: No migrations found for {0}, creating '
-                      'initial migrations.'.format(application))
-                try:
-                    call_command('schemamigration', application, initial=True)
-                except SystemExit:
-                    pass
-            except ImproperlyConfigured:
-                print('WARNING: The app: {0} could not be found.'.format(
-                    application
-                ))
-            else:
-                try:
-                    call_command('schemamigration', application, auto=True)
-                except SystemExit:
-                    pass
-    else:
-        call_command('makemigrations', *applications, merge=merge)
+    call_command('makemigrations', *applications, merge=merge)
 
 
 def squashmigrations(application, migration):
-    if DJANGO_1_6:
-        raise CommandError(u'Command not implemented for Django 1.6')
-    else:
-        call_command('squashmigrations', application, migration)
+    call_command('squashmigrations', application, migration)
 
 
 def generate_authors():

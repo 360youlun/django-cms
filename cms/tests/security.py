@@ -8,7 +8,6 @@ from cms.models.pluginmodel import CMSPlugin
 from cms.test_utils.testcases import (CMSTestCase, URL_CMS_PLUGIN_ADD,
                                       URL_CMS_PLUGIN_EDIT,
                                       URL_CMS_PLUGIN_REMOVE)
-from cms.utils.compat import DJANGO_1_6
 from cms.utils.compat.dj import get_user_model
 
 from djangocms_text_ckeditor.models import Text
@@ -41,12 +40,8 @@ class SecurityTests(CMSTestCase):
         self.client.logout()
         response = self.client.post(URL_CMS_PLUGIN_ADD, plugin_data)
         # since the user is not logged in, they should be prompted to log in.
-        if DJANGO_1_6:
-            self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, 'admin/login.html')
-        else:
-            self.assertEqual(response.status_code, 302)
-            self.assertRedirects(response, '/en/admin/login/?next=%s' % URL_CMS_PLUGIN_ADD)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/en/admin/login/?next=%s' % URL_CMS_PLUGIN_ADD)
         self.assertEqual(CMSPlugin.objects.count(), 0)
         # now log a staff user without permissions in and do the same as above.
         self.client.login(username=getattr(staff, get_user_model().USERNAME_FIELD),
@@ -73,12 +68,8 @@ class SecurityTests(CMSTestCase):
         url = URL_CMS_PLUGIN_EDIT + '%s/' % plugin.pk
         response = self.client.post(url, plugin_data)
         # since the user is not logged in, they should be prompted to log in.
-        if DJANGO_1_6:
-            self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, 'admin/login.html')
-        else:
-            self.assertEqual(response.status_code, 302)
-            self.assertRedirects(response, '/en/admin/login/?next=%s' % url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/en/admin/login/?next=%s' % url)
         plugin = self.reload(plugin)
         self.assertEqual(plugin.body, 'body')
         # now log a staff user without permissions in and do the same as above.
@@ -105,12 +96,8 @@ class SecurityTests(CMSTestCase):
         self.client.logout()
         response = self.client.post(URL_CMS_PLUGIN_REMOVE, plugin_data)
         # since the user is not logged in, they should be prompted to log in.
-        if DJANGO_1_6:
-            self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, 'admin/login.html')
-        else:
-            self.assertEqual(response.status_code, 302)
-            self.assertRedirects(response, '/en/admin/login/?next=%s' % URL_CMS_PLUGIN_REMOVE)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/en/admin/login/?next=%s' % URL_CMS_PLUGIN_REMOVE)
         self.assertEqual(CMSPlugin.objects.count(), 1)
         plugin = self.reload(plugin)
         self.assertEqual(plugin.body, 'body')
@@ -140,12 +127,8 @@ class SecurityTests(CMSTestCase):
         self.client.logout()
         response = self.client.post(url, plugin_data)
         # since the user is not logged in, they should be prompted to log in.
-        if DJANGO_1_6:
-            self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, 'admin/login.html')
-        else:
-            self.assertEqual(response.status_code, 302)
-            self.assertRedirects(response, '/en/admin/login/?next=%s' % url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/en/admin/login/?next=%s' % url)
         self.assertEqual(CMSPlugin.objects.count(), 0)
         # now log a staff user without permissions in and do the same as above.
         self.client.login(username=getattr(staff, get_user_model().USERNAME_FIELD),
@@ -173,12 +156,8 @@ class SecurityTests(CMSTestCase):
         self.client.logout()
         response = self.client.post(url, plugin_data)
         # since the user is not logged in, they should be prompted to log in.
-        if DJANGO_1_6:
-            self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, 'admin/login.html')
-        else:
-            self.assertEqual(response.status_code, 302)
-            self.assertRedirects(response, '/en/admin/login/?next=%s' % url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/en/admin/login/?next=%s' % url)
         plugin = self.reload(plugin)
         self.assertEqual(plugin.body, 'body')
         # now log a staff user without permissions in and do the same as above.
@@ -203,12 +182,8 @@ class SecurityTests(CMSTestCase):
         self.client.logout()
         response = self.client.post(url, plugin_data)
         # since the user is not logged in, they should be prompted to log in.
-        if DJANGO_1_6:
-            self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, 'admin/login.html')
-        else:
-            self.assertEqual(response.status_code, 302)
-            self.assertRedirects(response, '/en/admin/login/?next=%s' % url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/en/admin/login/?next=%s' % url)
         self.assertEqual(CMSPlugin.objects.count(), 1)
         # now log a staff user without permissions in and do the same as above.
         self.client.login(username=getattr(staff, get_user_model().USERNAME_FIELD),

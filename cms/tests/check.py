@@ -14,7 +14,6 @@ from cms.test_utils.project.pluginapp.plugins.manytomany_rel.models import Artic
 from cms.test_utils.project.extensionapp.models import MyPageExtension
 from cms.test_utils.util.context_managers import SettingsOverride
 from cms.utils.check import FileOutputWrapper, check, FileSectionWrapper
-from cms.utils.compat import DJANGO_1_6
 
 
 class TestOutput(FileOutputWrapper):
@@ -63,26 +62,16 @@ class CheckTests(unittest.TestCase, CheckAssertMixin):
             self.assertCheck(True, warnings=1, errors=0)
 
     def test_no_sekizai(self):
-        if DJANGO_1_6:
-            with SettingsOverride(INSTALLED_APPS=['cms', 'menus']):
-                old_libraries = base.libraries
-                base.libraries = {}
-                old_templatetags_modules = base.templatetags_modules
-                base.templatetags_modules = []
-                self.assertRaises(TemplateSyntaxError, check, TestOutput())
-                base.libraries = old_libraries
-                base.templatetags_modules = old_templatetags_modules
-        else:
-            from django.apps import apps
-            apps.set_available_apps(['cms', 'menus'])
-            old_libraries = base.libraries
-            base.libraries = {}
-            old_templatetags_modules = base.templatetags_modules
-            base.templatetags_modules = []
-            self.assertRaises(TemplateSyntaxError, check, TestOutput())
-            base.libraries = old_libraries
-            base.templatetags_modules = old_templatetags_modules
-            apps.unset_available_apps()
+        from django.apps import apps
+        apps.set_available_apps(['cms', 'menus'])
+        old_libraries = base.libraries
+        base.libraries = {}
+        old_templatetags_modules = base.templatetags_modules
+        base.templatetags_modules = []
+        self.assertRaises(TemplateSyntaxError, check, TestOutput())
+        base.libraries = old_libraries
+        base.templatetags_modules = old_templatetags_modules
+        apps.unset_available_apps()
 
     def test_no_sekizai_template_context_processor(self):
         with SettingsOverride(TEMPLATE_CONTEXT_PROCESSORS=[]):

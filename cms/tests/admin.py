@@ -36,7 +36,6 @@ from cms.test_utils.testcases import CMSTestCase, URL_CMS_PAGE_DELETE, URL_CMS_P
 from cms.test_utils.util.context_managers import SettingsOverride
 from cms.test_utils.util.fuzzy_int import FuzzyInt
 from cms.utils import get_cms_setting
-from cms.utils.compat import DJANGO_1_4, DJANGO_1_6
 from cms.utils.compat.dj import get_user_model, force_unicode
 
 
@@ -444,12 +443,8 @@ class AdminTestCase(AdminTestsBase):
         page = create_page('test-page', 'nav_playground.html', 'en')
         url = admin_reverse('cms_page_get_permissions', args=(page.pk,))
         response = self.client.get(url)
-        if DJANGO_1_6:
-            self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, 'admin/login.html')
-        else:
-            self.assertEqual(response.status_code, 302)
-            self.assertRedirects(response, '/en/admin/login/?next=/en/admin/cms/page/%s/permissions/' % page.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/en/admin/login/?next=/en/admin/cms/page/%s/permissions/' % page.pk)
         admin_user = self.get_superuser()
         with self.login_user_context(admin_user):
             response = self.client.get(url)
@@ -1215,8 +1210,7 @@ class PluginPermissionTests(AdminTestsBase):
         # => must see the PagePermissionInline
         self.assertTrue(
             any(type(inline) is PagePermissionInlineAdmin
-                for inline in page_admin.get_inline_instances(request,
-                                                              page if not DJANGO_1_4 else None)))
+                for inline in page_admin.get_inline_instances(request, page)))
 
         page = Page.objects.get(pk=page.pk)
         # remove can_change_permission
@@ -1228,7 +1222,7 @@ class PluginPermissionTests(AdminTestsBase):
         # => PagePermissionInline is no longer visible
         self.assertFalse(
             any(type(inline) is PagePermissionInlineAdmin
-                for inline in page_admin.get_inline_instances(request, page if not DJANGO_1_4 else None)))
+                for inline in page_admin.get_inline_instances(request, page)))
 
     def test_edit_title_is_allowed_for_staff_user(self):
         """

@@ -10,7 +10,6 @@ from django.contrib.sites.models import Site
 from cms.models import Page
 from cms.models.managers import (PagePermissionManager,
                                  GlobalPagePermissionManager)
-from cms.utils.compat import DJANGO_1_6
 from cms.utils.compat.dj import (force_unicode, python_2_unicode_compatible,
                                  is_user_swapped, user_model_label)
 from cms.utils.helpers import reversion_register
@@ -20,21 +19,14 @@ from cms.utils.helpers import reversion_register
 if is_user_swapped:
     user_app_name, user_model_name = user_model_label.rsplit('.', 1)
     User = None
-    if DJANGO_1_6:
-        for app in settings.INSTALLED_APPS:
-            if app.endswith(user_app_name):
-                user_app_models = importlib.import_module(app + ".models")
-                User = getattr(user_app_models, user_model_name)
-                break
-    else:
-        # This is sort of a hack
-        # AppConfig is not ready yet, and we blindly check if the user model
-        # application has already been loaded
-        from django.apps import apps
-        try:
-            User = apps.all_models[user_app_name][user_model_name.lower()]
-        except KeyError:
-            pass
+    # This is sort of a hack
+    # AppConfig is not ready yet, and we blindly check if the user model
+    # application has already been loaded
+    from django.apps import apps
+    try:
+        User = apps.all_models[user_app_name][user_model_name.lower()]
+    except KeyError:
+        pass
     if User is None:
         raise ImproperlyConfigured(
             "You have defined a custom user model %s, but the app %s is not "

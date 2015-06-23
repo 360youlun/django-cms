@@ -5,7 +5,6 @@ import inspect
 import warnings
 from cms.models.titlemodels import Title
 from cms.utils import get_language_from_request
-from cms.utils.compat import DJANGO_1_6
 from cms.utils.i18n import force_language, hide_untranslated
 from django.conf import settings
 from django.core.urlresolvers import NoReverseMatch, reverse, resolve
@@ -167,32 +166,5 @@ def static_stringifier(view):
     argument if it's a class definition to render it a static method.
     Before leaving we undo the monkeypatching.
     """
-    if DJANGO_1_6:
-        for idx, arg in enumerate(view.args):
-            if inspect.isclass(arg):
-                if hasattr(arg, '__unicode__'):
-                    @staticmethod
-                    def custom_str():
-                        return six.text_type(arg)
-                    arg._original = arg.__unicode__
-                    arg.__unicode__ = custom_str
-                view.args[idx] = arg
-        for key, arg in view.kwargs.items():
-            if inspect.isclass(arg):
-                if hasattr(arg, '__unicode__'):
-                    @staticmethod
-                    def custom_str():
-                        return six.text_type(arg)
-                    arg._original = arg.__unicode__
-                    arg.__unicode__ = custom_str
-                view.kwargs[key] = arg
+
     yield
-    if DJANGO_1_6:
-        for idx, arg in enumerate(view.args):
-            if inspect.isclass(arg):
-                if hasattr(arg, '__unicode__'):
-                    arg.__unicode__ = arg._original
-        for key, arg in view.kwargs.items():
-            if inspect.isclass(arg):
-                if hasattr(arg, '__unicode__'):
-                    arg.__unicode__ = arg._original

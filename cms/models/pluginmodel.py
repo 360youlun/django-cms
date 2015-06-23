@@ -7,7 +7,6 @@ from cms.exceptions import DontUsePageAttributeWarning
 from cms.models.placeholdermodel import Placeholder
 from cms.plugin_rendering import PluginContext, render_plugin
 from cms.utils import get_cms_setting
-from cms.utils.compat import DJANGO_1_5
 from cms.utils.compat.dj import force_unicode, python_2_unicode_compatible
 from cms.utils.compat.metaclasses import with_metaclass
 from cms.utils.helpers import reversion_register
@@ -247,10 +246,7 @@ class CMSPlugin(with_metaclass(PluginModelBase, MPTTModel)):
 
     def save(self, no_signals=False, *args, **kwargs):
         if no_signals:  # ugly hack because of mptt
-            if DJANGO_1_5:
-                super(CMSPlugin, self).save_base(cls=self.__class__)
-            else:
-                super(CMSPlugin, self).save_base()
+            super(CMSPlugin, self).save_base()
         else:
             super(CMSPlugin, self).save()
 
