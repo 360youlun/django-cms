@@ -1,5 +1,7 @@
+import django
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django import template
 
 from cms.utils.compat.dj import is_installed as app_is_installed
 
@@ -21,8 +23,24 @@ def validate_settings():
     """
     Check project settings file for required options
     """
-    if 'django.core.context_processors.request' not in settings.TEMPLATE_CONTEXT_PROCESSORS:
-        raise ImproperlyConfigured('django CMS requires django.core.context_processors.request in settings.TEMPLATE_CONTEXT_PROCESSORS to work correctly.')
+    ctx_present = False
+
+    if django.VERSION < (1, 8,):
+        request_ctx = 'django.core.context_processors.request'
+        if 'django.core.context_processors.request' not in settings.TEMPLATE_CONTEXT_PROCESSORS:
+            ctx_present = True
+    else:
+        request_ctx = 'django.template.context_processors.request'
+        for engine in template.engines.templates.values():
+            if request_ctx in engine.get('OPTIONS', {})\
+                    .get('context_processors', []):
+                ctx_present = True
+                break
+
+    if not ctx_present:
+        raise ImproperlyConfigured(
+            'django CMS requires %s in settings.TEMPLATE_CONTEXT_PROCESSORS to work correctly.' % request_ctx
+        )
 
 
 def setup():
